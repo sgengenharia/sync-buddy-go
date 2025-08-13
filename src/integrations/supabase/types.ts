@@ -145,6 +145,50 @@ export type Database = {
         }
         Relationships: []
       }
+      espacos: {
+        Row: {
+          capacidade: number | null
+          condominio_id: string
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          status: string
+          updated_at: string
+          valor_diaria: number | null
+        }
+        Insert: {
+          capacidade?: number | null
+          condominio_id: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          status?: string
+          updated_at?: string
+          valor_diaria?: number | null
+        }
+        Update: {
+          capacidade?: number | null
+          condominio_id?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          status?: string
+          updated_at?: string
+          valor_diaria?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "espacos_condominio_id_fkey"
+            columns: ["condominio_id"]
+            isOneToOne: false
+            referencedRelation: "condominios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       moradores: {
         Row: {
           bloco: string | null
@@ -188,6 +232,54 @@ export type Database = {
             columns: ["condominio_id"]
             isOneToOne: false
             referencedRelation: "condominios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reservas: {
+        Row: {
+          created_at: string
+          data_reserva: string
+          espaco_id: string
+          id: string
+          morador_id: string
+          observacoes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_reserva: string
+          espaco_id: string
+          id?: string
+          morador_id: string
+          observacoes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_reserva?: string
+          espaco_id?: string
+          id?: string
+          morador_id?: string
+          observacoes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservas_espaco_id_fkey"
+            columns: ["espaco_id"]
+            isOneToOne: false
+            referencedRelation: "espacos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservas_morador_id_fkey"
+            columns: ["morador_id"]
+            isOneToOne: false
+            referencedRelation: "moradores"
             referencedColumns: ["id"]
           },
         ]
