@@ -171,6 +171,7 @@ export default function AdminSuporte() {
         .insert({
           email: novoEmail.toLowerCase(), // Ensure email is lowercase
           tipo_acesso: tipoAcesso as any,
+          nome: nomeExibicao || novoEmail.split('@')[0], // Use nome_exibicao or email prefix as nome
           nome_exibicao: nomeExibicao,
           telefone: telefone
         });
