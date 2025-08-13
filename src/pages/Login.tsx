@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -7,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -24,62 +24,25 @@ export default function Login() {
     }
   }, [user, navigate]);
 
-  const checkLoginAttempts = async (email: string) => {
-    const { data } = await supabase
-      .from('tentativas_login')
-      .select('quantidade')
-      .eq('email', email)
-      .single();
-
-    return data?.quantidade || 0;
-  };
-
-  const incrementLoginAttempts = async (email: string) => {
-    const attempts = await checkLoginAttempts(email);
-    
-    await supabase
-      .from('tentativas_login')
-      .upsert({
-        email,
-        quantidade: attempts + 1,
-        ultimo_reset: new Date().toISOString()
-      });
-  };
-
-  const resetLoginAttempts = async (email: string) => {
-    await supabase
-      .from('tentativas_login')
-      .upsert({
-        email,
-        quantidade: 0,
-        ultimo_reset: new Date().toISOString()
-      });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      // Check login attempts
-      const attempts = await checkLoginAttempts(email);
-      if (attempts >= 5) {
-        setError('Muitas tentativas. Tente novamente em alguns minutos.');
-        setLoading(false);
-        return;
-      }
-
+      console.log('Tentando fazer login com:', email);
+      
       const { error } = await signIn(email, password);
 
       if (error) {
-        await incrementLoginAttempts(email);
+        console.error('Erro no login:', error);
         setError('Email ou senha incorretos. Tente novamente.');
       } else {
-        await resetLoginAttempts(email);
+        console.log('Login realizado com sucesso');
         // Redirect will be handled by useEffect when user state changes
       }
     } catch (err) {
+      console.error('Erro inesperado no login:', err);
       setError('Ocorreu um erro inesperado. Tente novamente.');
     } finally {
       setLoading(false);
@@ -155,6 +118,12 @@ export default function Login() {
               >
                 Esqueci minha senha
               </Link>
+            </div>
+
+            <div className="text-center text-sm text-muted-foreground">
+              <p>Para testar o sistema use:</p>
+              <p><strong>Email:</strong> comercial@sgeng.com.br</p>
+              <p><strong>Senha:</strong> (definir senha no Supabase Auth)</p>
             </div>
           </form>
         </CardContent>
