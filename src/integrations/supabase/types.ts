@@ -315,6 +315,8 @@ export type Database = {
           email: string
           id: string
           nome: string
+          nome_exibicao: string | null
+          telefone: string | null
           tipo_acesso: string
           updated_at: string
         }
@@ -324,6 +326,8 @@ export type Database = {
           email: string
           id?: string
           nome: string
+          nome_exibicao?: string | null
+          telefone?: string | null
           tipo_acesso: string
           updated_at?: string
         }
@@ -333,6 +337,8 @@ export type Database = {
           email?: string
           id?: string
           nome?: string
+          nome_exibicao?: string | null
+          telefone?: string | null
           tipo_acesso?: string
           updated_at?: string
         }
