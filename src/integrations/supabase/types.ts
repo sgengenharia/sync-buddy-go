@@ -14,6 +14,104 @@ export type Database = {
   }
   public: {
     Tables: {
+      atividades_crm: {
+        Row: {
+          autor_usuario_id: string | null
+          chamado_id: string
+          conteudo: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          autor_usuario_id?: string | null
+          chamado_id: string
+          conteudo?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          autor_usuario_id?: string | null
+          chamado_id?: string
+          conteudo?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atividades_crm_chamado_id_fkey"
+            columns: ["chamado_id"]
+            isOneToOne: false
+            referencedRelation: "chamados_crm"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chamados_crm: {
+        Row: {
+          condominio_id: string
+          data_criacao: string
+          descricao: string
+          id: string
+          morador_id: string | null
+          status: string
+          tags: string[] | null
+          telefone_contato: string | null
+          tipo: string
+          updated_at: string
+          urgencia: string
+        }
+        Insert: {
+          condominio_id: string
+          data_criacao?: string
+          descricao: string
+          id?: string
+          morador_id?: string | null
+          status?: string
+          tags?: string[] | null
+          telefone_contato?: string | null
+          tipo: string
+          updated_at?: string
+          urgencia: string
+        }
+        Update: {
+          condominio_id?: string
+          data_criacao?: string
+          descricao?: string
+          id?: string
+          morador_id?: string | null
+          status?: string
+          tags?: string[] | null
+          telefone_contato?: string | null
+          tipo?: string
+          updated_at?: string
+          urgencia?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chamados_crm_condominio_id_fkey"
+            columns: ["condominio_id"]
+            isOneToOne: false
+            referencedRelation: "condominios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chamados_crm_morador_id_fkey"
+            columns: ["morador_id"]
+            isOneToOne: false
+            referencedRelation: "moradores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       condominios: {
         Row: {
           ativo: boolean
@@ -46,6 +144,53 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      moradores: {
+        Row: {
+          bloco: string | null
+          condominio_id: string
+          created_at: string
+          id: string
+          nome: string
+          permissoes: Json | null
+          status: string
+          telefone: string
+          unidade: string
+          updated_at: string
+        }
+        Insert: {
+          bloco?: string | null
+          condominio_id: string
+          created_at?: string
+          id?: string
+          nome: string
+          permissoes?: Json | null
+          status?: string
+          telefone: string
+          unidade: string
+          updated_at?: string
+        }
+        Update: {
+          bloco?: string | null
+          condominio_id?: string
+          created_at?: string
+          id?: string
+          nome?: string
+          permissoes?: Json | null
+          status?: string
+          telefone?: string
+          unidade?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moradores_condominio_id_fkey"
+            columns: ["condominio_id"]
+            isOneToOne: false
+            referencedRelation: "condominios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tentativas_login: {
         Row: {

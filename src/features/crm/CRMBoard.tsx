@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,21 +30,44 @@ export function CRMBoard({ condominioId }: CRMBoardProps) {
 
     const load = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("chamados_crm")
-        .select("*")
-        .eq("condominio_id", condominioId)
-        .order("data_criacao", { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from("chamados_crm")
+          .select("*")
+          .eq("condominio_id", condominioId)
+          .order("data_criacao", { ascending: false });
 
-      if (error) {
-        console.error(error);
+        if (error) {
+          console.error("Erro ao carregar chamados:", error);
+          toast({
+            title: "Erro ao carregar CRM",
+            description: "Não foi possível carregar os chamados.",
+            variant: "destructive",
+          });
+        } else {
+          // Mapear os dados do banco para o tipo CRMChamado
+          const mappedChamados: CRMChamado[] = (data || []).map((item: any) => ({
+            id: item.id,
+            condominio_id: item.condominio_id,
+            morador_id: item.morador_id,
+            tipo: item.tipo,
+            urgencia: item.urgencia,
+            telefone_contato: item.telefone_contato,
+            status: item.status as CRMStatus,
+            descricao: item.descricao,
+            tags: item.tags || [],
+            data_criacao: item.data_criacao,
+            updated_at: item.updated_at,
+          }));
+          setChamados(mappedChamados);
+        }
+      } catch (err) {
+        console.error("Erro inesperado:", err);
         toast({
-          title: "Erro ao carregar CRM",
-          description: "Não foi possível carregar os chamados.",
+          title: "Erro",
+          description: "Ocorreu um erro inesperado.",
           variant: "destructive",
         });
-      } else {
-        setChamados((data || []) as CRMChamado[]);
       }
       setLoading(false);
     };
@@ -119,36 +141,49 @@ export function CRMBoard({ condominioId }: CRMBoardProps) {
     if (!card || card.status === toStatus) return;
 
     const oldStatus = card.status;
-    // Atualiza status
-    const { error } = await supabase
-      .from("chamados_crm")
-      .update({ status: toStatus })
-      .eq("id", cardId);
+    try {
+      // Atualiza status
+      const { error } = await supabase
+        .from("chamados_crm")
+        .update({ status: toStatus })
+        .eq("id", cardId);
 
-    if (error) {
-      console.error(error);
+      if (error) {
+        console.error(error);
+        toast({
+          title: "Falha ao mover",
+          description: "Não foi possível atualizar o status do chamado.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Loga atividade de mudança de status
+      const { error: actError } = await supabase
+        .from("atividades_crm")
+        .insert({
+          chamado_id: cardId,
+          tipo: "status_change",
+          conteudo: `Status: ${oldStatus} -> ${toStatus}`,
+          metadata: { from: oldStatus, to: toStatus },
+        });
+      
+      if (actError) console.error("Erro ao registrar atividade:", actError);
+
+      toast({ title: "Chamado movido", description: `Novo status: ${toStatus}` });
+      
+      // Otimista: atualiza local enquanto o realtime não chega
+      setChamados((prev) =>
+        prev.map((c) => (c.id === cardId ? { ...c, status: toStatus } : c))
+      );
+    } catch (err) {
+      console.error("Erro ao mover chamado:", err);
       toast({
-        title: "Falha ao mover",
-        description: "Não foi possível atualizar o status do chamado.",
+        title: "Erro",
+        description: "Ocorreu um erro ao mover o chamado.",
         variant: "destructive",
       });
-      return;
     }
-
-    // Loga atividade de mudança de status
-    const { error: actError } = await (supabase.from("atividades_crm" as any) as any).insert({
-      chamado_id: cardId,
-      tipo: "status_change",
-      conteudo: `Status: ${oldStatus} -> ${toStatus}`,
-      metadata: { from: oldStatus, to: toStatus },
-    } as any);
-    if (actError) console.error("Erro ao registrar atividade:", actError);
-
-    toast({ title: "Chamado movido", description: `Novo status: ${toStatus}` });
-    // Otimista: atualiza local enquanto o realtime não chega
-    setChamados((prev) =>
-      prev.map((c) => (c.id === cardId ? { ...c, status: toStatus } : c))
-    );
   };
 
   const toggleTag = (tag: string) => {

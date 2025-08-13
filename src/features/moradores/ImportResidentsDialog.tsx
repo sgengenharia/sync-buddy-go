@@ -125,10 +125,10 @@ export function ImportResidentsDialog({ condominioId, onImported }: ImportReside
       const payload = rows.map((r) => ({
         condominio_id: condominioId,
         nome: r.nome,
-  telefone: normalizeBrPhone(r.telefone), // já validado para 11 dígitos
+        telefone: normalizeBrPhone(r.telefone), // já validado para 11 dígitos
         unidade: r.unidade,
         bloco: r.bloco || null,
-        status: (r.status === "inativo" ? "inativo" : "ativo") as any,
+        status: (r.status === "inativo" ? "inativo" : "ativo") as "ativo" | "inativo",
         permissoes: {
           podeVotar: parseBool(r.podeVotar, true),
           recebeMsg: parseBool(r.recebeMsg, true),
@@ -141,7 +141,7 @@ export function ImportResidentsDialog({ condominioId, onImported }: ImportReside
       const chunkSize = 500;
       for (let i = 0; i < payload.length; i += chunkSize) {
         const chunk = payload.slice(i, i + chunkSize);
-        const { error } = await supabase.from("moradores").insert(chunk as any);
+        const { error } = await supabase.from("moradores").insert(chunk);
         if (error) throw error;
       }
 
